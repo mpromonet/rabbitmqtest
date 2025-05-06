@@ -1,23 +1,22 @@
-version: '3'
 
 services:
   blue:
-    image: rabbitmq:3.9.8-management
+    image: rabbitmq:4-management
     container_name: blue
     ports:
       - "5672:5672"
       - "15672:15672"
+      - "15670:15670"
+      - "15674:15674"
+      - "15675:15675"
     volumes:
       - ./blue/data:/var/lib/rabbitmq/mnesia
       - ./enabled_plugins:/etc/rabbitmq/enabled_plugins
-    environment:
-      RABBITMQ_DEFAULT_USER: admin
-      RABBITMQ_DEFAULT_PASS: admin
-    networks:
-      - rabbit_network
+      - ./definitions.json:/etc/rabbitmq/definitions.json
+      - ./20-def.conf:/etc/rabbitmq/conf.d/20-def.conf
 
   green:
-    image: rabbitmq:3.12.13-management
+    image: rabbitmq:4-management
     container_name: green
     ports:
       - "5673:5672"
@@ -28,9 +27,4 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: admin
       RABBITMQ_DEFAULT_PASS: admin
-    networks:
-      - rabbit_network
 
-networks:
-  rabbit_network:
-    driver: bridge

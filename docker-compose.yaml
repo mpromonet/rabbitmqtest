@@ -10,7 +10,6 @@ services:
       - "15674:15674"
       - "15675:15675"
     volumes:
-      - ./blue/data:/var/lib/rabbitmq/mnesia
       - ./enabled_plugins:/etc/rabbitmq/enabled_plugins
       - ./definitions.json:/etc/rabbitmq/definitions.json
       - ./20-def.conf:/etc/rabbitmq/conf.d/20-def.conf
@@ -22,7 +21,6 @@ services:
       - "5673:5672"
       - "15673:15672"
     volumes:
-      - ./green/data:/var/lib/rabbitmq/mnesia
       - ./enabled_plugins:/etc/rabbitmq/enabled_plugins
     environment:
       RABBITMQ_DEFAULT_USER: admin

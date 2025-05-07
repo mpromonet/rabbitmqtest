@@ -34,6 +34,18 @@ func main() {
 	failOnError(err, "Failed to open a channel")
 	defer ch.Close()
 
+	// Declare the exchange
+	err = ch.ExchangeDeclare(
+		"rpc_exchange", // name
+		"direct",       // type
+		true,           // durable
+		false,          // auto-deleted
+		false,          // internal
+		false,          // no-wait
+		nil,            // arguments
+	)
+	failOnError(err, "Failed to declare the exchange")
+
 	q, err := ch.QueueDeclare(
 		"rpc_queue", // name
 		false,       // durable
@@ -43,6 +55,16 @@ func main() {
 		nil,         // arguments
 	)
 	failOnError(err, "Failed to declare a queue")
+
+	// Bind the queue to the exchange
+	err = ch.QueueBind(
+		q.Name,         // queue name
+		"rpc_queue",    // routing key
+		"rpc_exchange", // exchange name
+		false,          // no-wait
+		nil,            // arguments
+	)
+	failOnError(err, "Failed to bind the queue to the exchange")
 
 	err = ch.Qos(
 		1,     // prefetch count
@@ -74,11 +96,12 @@ func main() {
 			log.Printf(" [.] fib(%d)", n)
 			response := fib(n)
 
+			log.Printf("publish %d correlationId:%v replyTo:%v", response, d.CorrelationId, d.ReplyTo)
 			err = ch.PublishWithContext(ctx,
-				"",        // exchange
-				d.ReplyTo, // routing key
-				false,     // mandatory
-				false,     // immediate
+				"rpc_exchange", // exchange
+				d.ReplyTo,      // routing key
+				false,          // mandatory
+				false,          // immediate
 				amqp.Publishing{
 					ContentType:   "text/plain",
 					CorrelationId: d.CorrelationId,

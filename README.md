@@ -72,7 +72,7 @@ The `blue` and `green` clusters are configured in the docker-compose file to inc
 Create a Federation link using the management UI of the downstream server, `green` first.
 
 ```bash
-docker exec -it green rabbitmqctl set_parameter federation-upstream federation-with-blue '{"uri":"amqp://admin:admin@blue:5672","expires":3600000, "exchange":"customers"}'
+docker exec -it green rabbitmqctl set_parameter federation-upstream federation-with-blue '{"uri":"amqp://admin:admin@blue:5672","expires":3600000, "exchange":".*"}'
 ```
 
 ### 1.2 Establish Federation Link at the Blue cluster (Optional)
@@ -82,7 +82,7 @@ This step must be done only when you need the Bidirectional data flow. By having
 Repeat the steps in the management UI of `blue` cluster as mentioned in the section 1.1 but with the following config values, 
 
 ```bash
-docker exec -it blue rabbitmqctl set_parameter federation-upstream federation-with-green '{"uri":"amqp://admin:admin@green:5672","expires":3600000, "exchange":"customers"}'
+docker exec -it blue rabbitmqctl set_parameter federation-upstream federation-with-green '{"uri":"amqp://admin:admin@green:5672","expires":3600000, "exchange":".*"}'
 ```
 
 ## Step 4: Create Federation Policies

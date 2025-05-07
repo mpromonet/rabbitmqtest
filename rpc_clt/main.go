@@ -32,23 +32,35 @@ func fibonacciRPC(rabbitMQURL string, n int) (res int, err error) {
 	failOnError(err, "Failed to open a channel")
 	defer ch.Close()
 
+	// Declare the exchange for answer
+	err = ch.ExchangeDeclare(
+		"rpc_answerexchange", // name
+		"direct",             // type
+		true,                 // durable
+		false,                // auto-deleted
+		false,                // internal
+		false,                // no-wait
+		nil,                  // arguments
+	)
+	failOnError(err, "Failed to declare the exchange")
+
 	q, err := ch.QueueDeclare(
-		"",    // name
-		false, // durable
-		false, // delete when unused
-		true,  // exclusive
-		false, // noWait
-		nil,   // arguments
+		"rpc_answer", // name
+		false,        // durable
+		false,        // delete when unused
+		false,        // exclusive
+		false,        // noWait
+		nil,          // arguments
 	)
 	failOnError(err, "Failed to declare a queue")
 
 	// Bind the queue to the exchange
 	err = ch.QueueBind(
-		q.Name,         // queue name
-		q.Name,         // routing key
-		"rpc_exchange", // exchange name
-		false,          // no-wait
-		nil,            // arguments
+		q.Name,               // queue name
+		q.Name,               // routing key
+		"rpc_answerexchange", // exchange name
+		false,                // no-wait
+		nil,                  // arguments
 	)
 	failOnError(err, "Failed to bind the queue to the exchange")
 
@@ -70,10 +82,10 @@ func fibonacciRPC(rabbitMQURL string, n int) (res int, err error) {
 
 	log.Printf("publish %d correlationId:%v replyTo:%v", n, corrId, q.Name)
 	err = ch.PublishWithContext(ctx,
-		"rpc_exchange", // exchange
-		"rpc_queue",    // routing key
-		false,          // mandatory
-		false,          // immediate
+		"rpc_requestexchange", // exchange
+		"rpc_request",         // routing key
+		false,                 // mandatory
+		false,                 // immediate
 		amqp.Publishing{
 			ContentType:   "text/plain",
 			CorrelationId: corrId,
@@ -83,6 +95,7 @@ func fibonacciRPC(rabbitMQURL string, n int) (res int, err error) {
 	failOnError(err, "Failed to publish a message")
 
 	for d := range msgs {
+		log.Printf("Received message with correlationId: %s", d.CorrelationId)
 		if corrId == d.CorrelationId {
 			res, err = strconv.Atoi(string(d.Body))
 			failOnError(err, "Failed to convert body to integer")

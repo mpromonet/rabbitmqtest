@@ -36,33 +36,33 @@ func main() {
 
 	// Declare the exchange
 	err = ch.ExchangeDeclare(
-		"rpc_exchange", // name
-		"direct",       // type
-		true,           // durable
-		false,          // auto-deleted
-		false,          // internal
-		false,          // no-wait
-		nil,            // arguments
+		"rpc_requestexchange", // name
+		"direct",              // type
+		true,                  // durable
+		false,                 // auto-deleted
+		false,                 // internal
+		false,                 // no-wait
+		nil,                   // arguments
 	)
 	failOnError(err, "Failed to declare the exchange")
 
 	q, err := ch.QueueDeclare(
-		"rpc_queue", // name
-		false,       // durable
-		false,       // delete when unused
-		false,       // exclusive
-		false,       // no-wait
-		nil,         // arguments
+		"rpc_request", // name
+		false,         // durable
+		false,         // delete when unused
+		false,         // exclusive
+		false,         // no-wait
+		nil,           // arguments
 	)
 	failOnError(err, "Failed to declare a queue")
 
 	// Bind the queue to the exchange
 	err = ch.QueueBind(
-		q.Name,         // queue name
-		"rpc_queue",    // routing key
-		"rpc_exchange", // exchange name
-		false,          // no-wait
-		nil,            // arguments
+		q.Name,                // queue name
+		q.Name,                // routing key
+		"rpc_requestexchange", // exchange name
+		false,                 // no-wait
+		nil,                   // arguments
 	)
 	failOnError(err, "Failed to bind the queue to the exchange")
 
@@ -98,10 +98,10 @@ func main() {
 
 			log.Printf("publish %d correlationId:%v replyTo:%v", response, d.CorrelationId, d.ReplyTo)
 			err = ch.PublishWithContext(ctx,
-				"rpc_exchange", // exchange
-				d.ReplyTo,      // routing key
-				false,          // mandatory
-				false,          // immediate
+				"rpc_answerexchange", // exchange
+				d.ReplyTo,            // routing key
+				false,                // mandatory
+				false,                // immediate
 				amqp.Publishing{
 					ContentType:   "text/plain",
 					CorrelationId: d.CorrelationId,

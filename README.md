@@ -50,8 +50,8 @@ The settings such as username, queues, exchanges and their bindings have to copi
 Run the following command to export the settings to a file called `blue.json`
 
 ```bash
- docker exec -it blue  rabbitmqctl export_definitions blue.json --format json
- docker cp blue:blue.json .
+docker exec -it blue  rabbitmqctl export_definitions blue.json --format json
+docker cp blue:blue.json .
 ```
 
 Run the following command to import the settings into the `green` cluster
@@ -71,13 +71,9 @@ The `blue` and `green` clusters are configured in the docker-compose file to inc
 
 Create a Federation link using the management UI of the downstream server, `green` first.
 
-![Federation Upstream](./assets/federation-upstream.png)
-
-The following values are set for the Federation link in the UI
-
-- Name: `federation-with-blue`
-- URI: `amqp://admin:admin@blue:5672`
-- Exchange: `.*` (This value can be also set to any other regular expression pattern to filter Exchanges that needs to be federated.)
+```bash
+docker exec -it green rabbitmqctl set_parameter federation-upstream federation-with-blue '{"uri":"amqp://admin:admin@blue:5672","expires":3600000, "exchange":"customers"}'
+```
 
 ### 1.2 Establish Federation Link at the Blue cluster (Optional)
 
@@ -85,9 +81,9 @@ This step must be done only when you need the Bidirectional data flow. By having
 
 Repeat the steps in the management UI of `blue` cluster as mentioned in the section 1.1 but with the following config values, 
 
-- Name: `federation-with-green`
-- URI: `amqp://admin:admin@green:5672`
-- Exchange: `.*`
+```bash
+docker exec -it blue rabbitmqctl set_parameter federation-upstream federation-with-green '{"uri":"amqp://admin:admin@green:5672","expires":3600000, "exchange":"customers"}'
+```
 
 ## Step 4: Create Federation Policies
 

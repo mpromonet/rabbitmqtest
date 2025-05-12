@@ -42,6 +42,16 @@ docker exec -it blue  rabbitmqadmin -u admin -p admin declare queue name=custome
 docker exec -it blue  rabbitmqadmin -u admin -p admin declare binding source=customers destination=customers.us routing_key=us
 docker exec -it blue  rabbitmqadmin -u admin -p admin declare binding source=customers destination=customers.de routing_key=de
 
+
+
+docker exec -it blue  rabbitmqadmin -u admin -p admin declare exchange name=rpc_requestexchange type=direct
+docker exec -it blue  rabbitmqadmin -u admin -p admin declare queue name=rpc_request durable=true
+docker exec -it blue  rabbitmqadmin -u admin -p admin declare binding source=rpc_requestexchange destination=rpc_request routing_key=rpc_request
+
+docker exec -it blue  rabbitmqadmin -u admin -p admin declare exchange name=rpc_answerexchange type=direct
+docker exec -it blue  rabbitmqadmin -u admin -p admin declare queue name=rpc_answer durable=true
+docker exec -it blue  rabbitmqadmin -u admin -p admin declare binding source=rpc_answerexchange destination=rpc_answer routing_key=rpc_answer
+
 ```
 ## Step 2: Sync Cluster Settings
 
@@ -73,6 +83,7 @@ Create a Federation link using the management UI of the downstream server, `gree
 
 ```bash
 docker exec -it green rabbitmqctl set_parameter federation-upstream federation-with-blue '{"uri":"amqp://admin:admin@blue:5672","expires":3600000, "exchange":".*"}'
+
 ```
 
 ### 1.2 Establish Federation Link at the Blue cluster (Optional)

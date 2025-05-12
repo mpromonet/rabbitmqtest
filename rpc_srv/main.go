@@ -38,7 +38,7 @@ func main() {
 	err = ch.ExchangeDeclare(
 		"rpc_requestexchange", // name
 		"direct",              // type
-		false,                 // durable
+		true,                  // durable
 		false,                 // auto-deleted
 		false,                 // internal
 		false,                 // no-wait

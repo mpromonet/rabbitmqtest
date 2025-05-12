@@ -38,7 +38,7 @@ func main() {
 	err = ch.ExchangeDeclare(
 		"rpc_requestexchange", // name
 		"direct",              // type
-		true,                  // durable
+		false,                 // durable
 		false,                 // auto-deleted
 		false,                 // internal
 		false,                 // no-wait
@@ -48,7 +48,7 @@ func main() {
 
 	q, err := ch.QueueDeclare(
 		"rpc_request", // name
-		false,         // durable
+		true,          // durable
 		false,         // delete when unused
 		false,         // exclusive
 		false,         // no-wait

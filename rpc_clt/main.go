@@ -32,11 +32,22 @@ func fibonacciRPC(rabbitMQURL string, n int) (res int, err error) {
 	failOnError(err, "Failed to open a channel")
 	defer ch.Close()
 
+	err = ch.ExchangeDeclare(
+		"rpc_requestexchange", // name
+		"direct",              // type
+		false,                 // durable
+		false,                 // auto-deleted
+		false,                 // internal
+		false,                 // no-wait
+		nil,                   // arguments
+	)
+	failOnError(err, "Failed to declare the exchange")
+
 	// Declare the exchange for answer
 	err = ch.ExchangeDeclare(
 		"rpc_answerexchange", // name
 		"direct",             // type
-		true,                 // durable
+		false,                // durable
 		false,                // auto-deleted
 		false,                // internal
 		false,                // no-wait
@@ -46,7 +57,7 @@ func fibonacciRPC(rabbitMQURL string, n int) (res int, err error) {
 
 	q, err := ch.QueueDeclare(
 		"rpc_answer", // name
-		false,        // durable
+		true,         // durable
 		false,        // delete when unused
 		false,        // exclusive
 		false,        // noWait

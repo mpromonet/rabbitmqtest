@@ -155,3 +155,11 @@ The consumer which is running in the `green` cluster can consume the new message
 
 Thus **Federation** is a great mechanism to move RabbitMQ clients across different clusters. This feature becomes super useful when migrating the RabbitMQ clusters. However, an important note is Federation do not relay messages which are published to the **default** exchange.
 
+shovel
+===
+```
+docker exec -it green rabbitmqctl set_parameter shovel request '{"src-uri":"amqp://admin:admin@green:5672", "dest-uri":"amqp://admin:admin@blue:5672", "src-queue":"rpc_request", "dest-queue":"rpc_request"}'
+
+docker exec -it green rabbitmqctl set_parameter shovel answer '{"src-uri":"amqp://admin:admin@blue:5672", "dest-uri":"amqp://admin:admin@green:5672", "src-queue":"rpc_answer", "dest-queue":"rpc_answer"}'
+
+```
